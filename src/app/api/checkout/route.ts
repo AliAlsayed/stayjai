@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { stripe } from '@/lib/stripe/client'
+import { getStripe } from '@/lib/stripe/client'
 import { CREDIT_PACKS } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
 
   const origin = req.headers.get('origin') ?? process.env.NEXT_PUBLIC_APP_URL!
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: 'payment',
     payment_method_types: ['card'],
     line_items: [
