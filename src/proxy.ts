@@ -28,21 +28,22 @@ export async function proxy(request: NextRequest) {
   // Refresh session — required for Server Components to stay in sync
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Protect history and credits purchase routes
-  const protectedPaths = ['/history', '/credits/purchase']
-  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  // Protect app routes — redirect unauthenticated users to login
+  const protectedPaths = ['/dashboard', '/history', '/credits']
+  const { pathname } = request.nextUrl
+  const isProtected = protectedPaths.some(p => pathname.startsWith(p))
 
   if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
-    loginUrl.searchParams.set('redirectTo', request.nextUrl.pathname)
+    loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
   return supabaseResponse
 }
 
-export const config = {
+export const proxyConfig = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
