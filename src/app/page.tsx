@@ -1,14 +1,10 @@
 import { ImageUploader } from '@/components/upload/ImageUploader'
-import { CreditBadge } from '@/components/credits/CreditBadge'
+import { Header } from '@/components/layout/Header'
 
 export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top bar */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-neutral-100">
-        <span className="font-semibold text-sm tracking-tight">StageAI</span>
-        <CreditBadge />
-      </header>
+      <Header />
 
       {/* Hero */}
       <section className="flex flex-col items-center justify-center flex-1 px-4 py-10 text-center gap-3">
