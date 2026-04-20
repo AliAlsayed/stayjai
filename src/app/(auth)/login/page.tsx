@@ -5,13 +5,12 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
+import { AuthLayout } from '@/components/auth/AuthLayout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
 type Mode = 'signin' | 'signup' | 'sent'
-
-const CURRENT_YEAR = new Date().getFullYear()
 
 export default function LoginPage() {
   const router = useRouter()
@@ -65,171 +64,150 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-foreground flex-col justify-between p-12">
-        <span className="text-sm font-semibold tracking-tight text-background opacity-90">
-          StageAI
-        </span>
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <p className="text-xs font-medium tracking-widest uppercase text-background opacity-40">
-              AI Virtual Staging
+    <AuthLayout>
+      {mode === 'sent' ? (
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-foreground">Check your email</h1>
+            <p className="text-sm text-muted-foreground">
+              We sent a confirmation link to{' '}
+              <span className="text-foreground font-medium">{email}</span>.
+              Click it to activate your account.
             </p>
-            <h2 className="text-4xl font-semibold leading-tight text-background">
-              Transform empty rooms into listing-ready interiors.
-            </h2>
           </div>
-          <p className="text-sm text-background opacity-50 leading-relaxed max-w-xs">
-            Upload a photo. Pick a style. Get a professionally staged result in seconds — no furniture, no photographer.
-          </p>
+          <button
+            onClick={() => setMode('signin')}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+          >
+            Back to sign in
+          </button>
         </div>
-        <p className="text-xs text-background opacity-25 tracking-wide">
-          © {CURRENT_YEAR} StageAI
-        </p>
-      </div>
+      ) : (
+        <>
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-foreground">
+              {mode === 'signin' ? 'Welcome back' : 'Create your account'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {mode === 'signin'
+                ? 'Sign in to continue to StageAI.'
+                : 'Start staging for free — 3 credits included.'}
+            </p>
+          </div>
 
-      <div className="flex-1 flex items-center justify-center bg-background px-6 py-12">
-        <div className="w-full max-w-sm space-y-8">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={handleGoogle}
+            disabled={loading}
+            className="w-full gap-2.5"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </Button>
 
-          <p className="lg:hidden text-sm font-semibold tracking-tight text-foreground">
-            StageAI
-          </p>
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="flex-1 h-px bg-border" />
+          </div>
 
-          {mode === 'sent' ? (
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h1 className="text-xl font-semibold text-foreground">Check your email</h1>
-                <p className="text-sm text-muted-foreground">
-                  We sent a confirmation link to{' '}
-                  <span className="text-foreground font-medium">{email}</span>.
-                  Click it to activate your account.
-                </p>
-              </div>
+          <div className="flex border-b border-border">
+            {(['signin', 'signup'] as const).map((m) => (
               <button
-                onClick={() => setMode('signin')}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-              >
-                Back to sign in
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-1">
-                <h1 className="text-xl font-semibold text-foreground">
-                  {mode === 'signin' ? 'Welcome back' : 'Create your account'}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {mode === 'signin'
-                    ? 'Sign in to continue to StageAI.'
-                    : 'Start staging for free — 3 credits included.'}
-                </p>
-              </div>
-
-              <Button
+                key={m}
                 type="button"
-                variant="outline"
-                size="lg"
-                onClick={handleGoogle}
-                disabled={loading}
-                className="w-full gap-2.5"
-              >
-                <GoogleIcon />
-                Continue with Google
-              </Button>
-
-              <div className="relative flex items-center gap-3">
-                <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-muted-foreground">or</span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
-
-              <div className="flex border-b border-border">
-                {(['signin', 'signup'] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMode(m)}
-                    className={cn(
-                      'flex-1 pb-2.5 text-sm font-medium transition-colors',
-                      mode === m
-                        ? 'text-foreground border-b-2 border-foreground -mb-px'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {m === 'signin' ? 'Sign In' : 'Sign Up'}
-                  </button>
-                ))}
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="text-xs">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label htmlFor="password" className="text-xs">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                  />
-                </div>
-
-                {mode === 'signup' && (
-                  <div className="space-y-1.5">
-                    <Label htmlFor="confirm-password" className="text-xs">Confirm Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      autoComplete="new-password"
-                      required
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
-                    />
-                  </div>
+                onClick={() => setMode(m)}
+                className={cn(
+                  'flex-1 pb-2.5 text-sm font-medium transition-colors',
+                  mode === m
+                    ? 'text-foreground border-b-2 border-foreground -mb-px'
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
+              >
+                {m === 'signin' ? 'Sign In' : 'Sign Up'}
+              </button>
+            ))}
+          </div>
 
-                <Button
-                  type="submit"
-                  size="lg"
-                  disabled={loading || !email || !password}
-                  className="w-full"
-                >
-                  {loading
-                    ? mode === 'signin' ? 'Signing in…' : 'Creating account…'
-                    : mode === 'signin' ? 'Sign In' : 'Create Account'}
-                </Button>
-              </form>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+              />
+            </div>
 
-              <p className="text-center text-xs text-muted-foreground">
-                {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
-                <button
-                  type="button"
-                  onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
-                  className="text-foreground font-medium hover:underline underline-offset-2 transition-colors"
-                >
-                  {mode === 'signin' ? 'Sign up free' : 'Sign in'}
-                </button>
-              </p>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-xs">Password</Label>
+                {mode === 'signin' && (
+                  <a
+                    href="/forgot-password"
+                    className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Forgot password?
+                  </a>
+                )}
+              </div>
+              <Input
+                id="password"
+                type="password"
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+              />
+            </div>
+
+            {mode === 'signup' && (
+              <div className="space-y-1.5">
+                <Label htmlFor="confirm-password" className="text-xs">Confirm Password</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                />
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              size="lg"
+              disabled={loading || !email || !password}
+              className="w-full"
+            >
+              {loading
+                ? mode === 'signin' ? 'Signing in…' : 'Creating account…'
+                : mode === 'signin' ? 'Sign In' : 'Create Account'}
+            </Button>
+          </form>
+
+          <p className="text-center text-xs text-muted-foreground">
+            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              type="button"
+              onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}
+              className="text-foreground font-medium hover:underline underline-offset-2 transition-colors"
+            >
+              {mode === 'signin' ? 'Sign up free' : 'Sign in'}
+            </button>
+          </p>
+        </>
+      )}
+    </AuthLayout>
   )
 }
 

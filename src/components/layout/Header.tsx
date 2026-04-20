@@ -23,6 +23,7 @@ export async function Header() {
             <Link href="/dashboard" className={navLinkClass}>Dashboard</Link>
             <Link href="/history" className={navLinkClass}>History</Link>
             <Link href="/credits" className={navLinkClass}>Credits</Link>
+            <Link href="/account" className={navLinkClass}>Account</Link>
             <CreditBadge />
             <SignOutButton />
           </>

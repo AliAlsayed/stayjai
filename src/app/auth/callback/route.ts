@@ -15,5 +15,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Route expired/invalid password-reset tokens back to forgot-password
+  if (next.startsWith('/reset-password')) {
+    return NextResponse.redirect(`${origin}/forgot-password?error=link_expired`)
+  }
+
   return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
 }
